@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update Packagist
+        run: |
+          curl -XPOST -H'content-type:application/json' \
+            "https://packagist.org/api/update-package?username=faiscadev&apiToken=${{ secrets.PACKAGIST_API_TOKEN }}" \
+            -d'{"repository":{"url":"https://github.com/faiscadev/pxshot-php"}}'
